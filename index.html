@@ -1,261 +1,147 @@
 <!doctype html>
-<html lang="zh-CN">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#211e19">
-<meta name="description" content="六爻周易排盘、纳甲五行、六亲、世应、动爻与本地周易知识搜索工具">
-<title>六爻周易排盘</title>
+<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#211e19"><title>六爻周易排盘 V6</title>
 <style>
-*{box-sizing:border-box}body{margin:0;font-family:"Microsoft YaHei",system-ui,sans-serif;background:#f3f0e8;color:#29251f}
-header{background:#211e19;color:#f8f3e7;padding:22px;text-align:center}header h1{margin:0;font-size:28px}
-main{max-width:1200px;margin:22px auto;padding:0 16px}.toolbar{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:18px}.tabs{display:flex;gap:6px;margin:0 0 14px;flex-wrap:wrap}.tabs button{background:#e7e0d3;color:#29251f}.tabs button.on{background:#29251f;color:#fff}.result{border-top:1px solid #e4ded2;padding:12px 4px}.result b{font-size:16px}.muted{color:#756e63;font-size:13px}.pill{display:inline-block;background:#eee7d8;border-radius:99px;padding:2px 8px;font-size:12px;margin-left:6px}
-button{border:0;border-radius:8px;padding:11px 17px;background:#29251f;color:white;cursor:pointer;font-size:15px}button:hover{opacity:.88}
-.grid{display:grid;grid-template-columns:1.15fr .85fr;gap:18px}.card{background:#fffdf8;border:1px solid #d8d0c2;border-radius:12px;padding:18px;box-shadow:0 3px 12px #0000000b}
-.hex-title{text-align:center;font-size:24px;margin:5px 0 18px}.meta{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;background:#f5f1e8;padding:12px;border-radius:8px;margin-bottom:14px}
-.meta div{font-size:14px}.line{display:grid;grid-template-columns:55px 90px 70px 55px 55px 75px 55px 55px;align-items:center;border-top:1px solid #e4ded2;padding:11px 3px;cursor:pointer}.line:hover{background:#faf7f0}.line.active{background:#eee7d8}
-.symbol{font-size:24px;letter-spacing:2px}.move{font-weight:bold}.tag{font-size:13px}
-h2{font-size:18px;border-left:4px solid #29251f;padding-left:9px}.detail{white-space:pre-wrap;line-height:1.75;background:#f8f5ee;border-radius:8px;padding:14px;min-height:280px}
-.note{font-size:12px;color:#756e63;margin-top:12px}.gua-ci{line-height:1.7}
-@media(max-width:900px){.grid{grid-template-columns:1fr}.line{grid-template-columns:45px 75px repeat(6,1fr);font-size:13px}.symbol{font-size:19px}.meta{grid-template-columns:1fr 1fr}}
-</style>
-</head>
-<body>
-<header><h1>☯ 六爻周易排盘</h1><div>传统六爻排盘 · 纳甲五行 · 动爻变卦 · 周易知识搜索</div></header>
-<main>
-<div class="toolbar">
-<button onclick="coinCast()">🪙 铜钱起卦</button>
-<button onclick="timeCast()">🕐 时间起卦</button>
-<button onclick="randomCast()">🎲 随机起卦</button>
-<button onclick="clearCast()">↺ 清空</button>
-<button onclick="saveCurrent()">💾 保存排盘</button>
-<button onclick="exportText()">📄 导出文本</button>
-</div>
-
-<div class="card" style="margin-bottom:18px">
-  <div class="tabs">
-    <button id="tabAll" class="on" onclick="setSearchType('全部',this)">全部</button>
-    <button onclick="setSearchType('卦象',this)">卦象</button>
-    <button onclick="setSearchType('爻位',this)">爻位</button>
-    <button onclick="setSearchType('五行',this)">五行</button>
-    <button onclick="setSearchType('六亲',this)">六亲</button>
-    <button onclick="setSearchType('纳支',this)">纳支</button>
-    <button onclick="setSearchType('规则',this)">规则</button>
-  </div>
-  <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center">
-    <input id="searchBox" type="search" placeholder="搜索卦名、爻辞、纳支、五行、六亲、规则……"
-      oninput="searchKnowledge()" onkeydown="if(event.key==='Enter')searchKnowledge()"
-      style="flex:1;min-width:260px;padding:12px 14px;border:1px solid #d8d0c2;border-radius:8px;font-size:15px;background:#fff">
-    <button onclick="searchKnowledge()">🔎 搜索</button>
-    <button onclick="clearSearch()">清除</button>
-  </div>
-  <div id="searchResults" style="margin-top:12px"><span class="muted">可搜索卦名、爻位、地支、五行、六亲及六爻规则。</span></div>
-</div>
-
-<div class="grid">
-<section class="card">
-<div id="title" class="hex-title">等待起卦</div>
-<div id="meta" class="meta"></div>
-<div class="line" style="font-weight:bold;cursor:default"><div>爻位</div><div>爻象</div><div>阴阳</div><div>纳支</div><div>五行</div><div>六亲</div><div>世应</div><div>动</div></div>
-<div id="lines"></div>
-<div class="note">提示：本网页用于传统文化学习与娱乐，不构成现实决策依据。纳甲采用常见京房体系的基础排盘规则。</div>
-</section>
-<section class="card">
-<h2>卦象说明</h2><div id="gua" class="gua-ci">请先起卦。</div>
-<h2>逐爻解释</h2><div id="detail" class="detail">点击左侧任意一爻查看纳支、五行、六亲和解释。</div>
-</section>
-</div>
-</main>
-<footer style="max-width:1200px;margin:10px auto 28px;padding:0 16px;text-align:center;color:#756e63;font-size:12px">
-  六爻周易 · 传统文化学习工具 · 本地运行，无需服务器
-</footer>
+*{box-sizing:border-box}body{margin:0;font-family:"Microsoft YaHei",system-ui,sans-serif;background:#f3f0e8;color:#29251f}header{background:#211e19;color:#f8f3e7;padding:22px;text-align:center}h1{margin:0;font-size:28px}header p{margin:7px 0 0;opacity:.82}.wrap{max-width:1400px;margin:22px auto;padding:0 16px}.card{background:#fffdf8;border:1px solid #d8d0c2;border-radius:12px;padding:18px;margin-bottom:18px;box-shadow:0 3px 12px #0001}.toolbar,.tabs,.actions,.inline{display:flex;gap:8px;flex-wrap:wrap;align-items:center}.toolbar{margin-bottom:18px}button{border:0;border-radius:8px;padding:10px 15px;background:#29251f;color:#fff;cursor:pointer}button.alt{background:#e7e0d3;color:#29251f}button.hot{background:#6f4f2f}button.small{padding:6px 10px;font-size:12px}input,select{padding:10px;border:1px solid #d8d0c2;border-radius:8px;background:#fff;font-size:14px}.search{display:flex;gap:8px;margin-top:10px}.search input{flex:1;min-width:220px}.tabs{margin-bottom:10px}.tabs button{background:#e7e0d3;color:#29251f}.tabs .on{background:#29251f;color:#fff}.grid{display:grid;grid-template-columns:1.25fr .75fr;gap:18px}.title{text-align:center;font-size:25px;margin:5px 0 15px}.meta{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;background:#f5f1e8;padding:12px;border-radius:8px;margin-bottom:12px;font-size:13px}.thead,.row{display:grid;grid-template-columns:52px 82px 48px 92px 48px 62px 62px 62px 35px;align-items:center}.thead{font-size:12px;font-weight:bold;padding:7px 2px}.row{border-top:1px solid #e4ded2;padding:10px 2px;cursor:pointer;font-size:13px}.row:hover,.row.active{background:#eee7d8}.symbol{font-size:22px}.detail{white-space:pre-wrap;line-height:1.72;background:#f8f5ee;border-radius:8px;padding:14px;min-height:300px}.manualGrid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.manualLines{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin-top:12px}.manualLine{padding:10px;border:1px solid #e0d7c9;border-radius:9px;background:#faf7f0}.manualLine label{display:block;font-weight:bold;margin-bottom:6px}.result{border-top:1px solid #eee5d8;padding:10px 2px;line-height:1.6}.pill{font-size:12px;background:#eee7d8;padding:2px 7px;border-radius:99px;margin-left:5px}.muted{color:#756e63;font-size:13px}.history{border-top:1px solid #eee5d8;padding:10px 0;display:flex;justify-content:space-between;gap:10px}.hint{font-size:12px;color:#756e63;line-height:1.6;margin-top:8px}.settings{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}.field label{display:block;font-size:12px;color:#756e63;margin-bottom:4px}.field input,.field select{width:100%}.tag{display:inline-block;background:#efe7d8;border-radius:99px;padding:4px 9px;margin:2px;font-size:12px}.guaText{line-height:1.75}.ok{font-weight:bold}.warn{color:#9b3d25}.two{display:grid;grid-template-columns:1fr 1fr;gap:18px}.subhead{font-weight:bold;margin:10px 0}.mini{font-size:12px;color:#756e63}.searchResultActions{margin-top:7px}.tableWrap{overflow-x:auto}@media(max-width:1000px){.grid{grid-template-columns:1fr}.meta{grid-template-columns:1fr 1fr}.settings{grid-template-columns:1fr 1fr}.two{grid-template-columns:1fr}}@media(max-width:600px){.manualLines{grid-template-columns:1fr}.meta{grid-template-columns:1fr}.settings{grid-template-columns:1fr}.thead,.row{grid-template-columns:40px 60px 38px 78px 42px 54px 54px 54px 30px;font-size:10px}.symbol{font-size:18px}.card{padding:13px}h1{font-size:23px}}
+</style></head><body>
+<header><h1>☯ 六爻周易排盘 V6</h1><p>64卦·384爻辞搜索 · 现实铜钱录入 · 纳甲纳支 · 六亲 · 世应 · 六神 · 月建日辰 · 旬空 · 动爻变卦</p></header>
+<div class="wrap">
+<div class="toolbar"><button onclick="coinCast()">🪙 铜钱起卦</button><button onclick="randomCast()">🎲 随机起卦</button><button class="hot" onclick="openManual()">✍️ 自定义起卦</button><button class="alt" onclick="clearCast()">↺ 清空</button><button onclick="saveCurrent()">💾 保存排盘</button><button onclick="exportText()">📄 导出文本</button></div>
+<section class="card" id="manual" style="display:none"><h2>✍️ 现实铜钱起卦录入</h2><div class="hint">把现实中已经摇出的六次结果按<b>初爻 → 二爻 → 三爻 → 四爻 → 五爻 → 上爻</b>输入。网站不会重新随机你的现实结果；起卦时间用于记录、计算日辰/旬空/六神/月建等信息。</div><div class="manualGrid" style="margin-top:12px"><div class="field"><label>起卦日期时间</label><input id="mt" type="datetime-local"></div><div class="field"><label>占问事项（可选）</label><input id="mq" placeholder="例如：四级考试、工作、感情、财运……"></div></div><div class="manualLines" id="manualLines"></div><div class="actions" style="margin-top:12px"><button class="hot" onclick="applyManual()">🔮 按输入结果排盘</button><button class="alt" onclick="closeManual()">取消</button></div></section>
+<section class="card"><h2>📅 历法与排盘设置</h2><div class="settings"><div class="field"><label>月建</label><select id="monthBranch"><option value="auto">按起卦日期自动推算</option><option>寅</option><option>卯</option><option>辰</option><option>巳</option><option>午</option><option>未</option><option>申</option><option>酉</option><option>戌</option><option>亥</option><option>子</option><option>丑</option></select></div><div class="field"><label>日柱</label><select id="dayPillarMode"><option value="auto">按日期自动计算</option><option value="manual">手动指定</option></select></div><div class="field" id="dayManualWrap" style="display:none"><label>手动日柱</label><select id="dayPillar"></select></div><div class="field"><label>换日规则</label><select id="dayBoundary"><option value="23">23:00 子初换日</option><option value="0">00:00 换日</option></select></div></div><div id="calendarInfo" class="hint">起卦后自动显示年柱、月柱、日柱、日辰、旬空、六神起始。</div></section>
+<section class="card"><h2>🔎 搜索64卦、384爻辞与六爻知识</h2><div class="tabs" id="tabs"><button class="on" onclick="setType('全部',this)">全部</button><button onclick="setType('卦象',this)">64卦</button><button onclick="setType('爻辞',this)">384爻</button><button onclick="setType('爻位',this)">爻位</button><button onclick="setType('五行',this)">五行</button><button onclick="setType('六亲',this)">六亲</button><button onclick="setType('纳支',this)">纳支</button><button onclick="setType('规则',this)">规则</button></div><div class="search"><input id="q" placeholder="搜索：乾、困、水雷屯、泽水困、初九、上六、子水、妻财、旬空……" oninput="searchKnowledge()"><button onclick="searchKnowledge()">🔍 搜索</button><button class="alt" onclick="document.getElementById('q').value='';searchKnowledge()">清除</button></div><div id="results" class="hint">可直接搜索64卦名称、上下卦组合、384条爻辞、六亲、地支五行和六爻规则。</div></section>
+<div class="grid"><section class="card"><div id="title" class="title">等待起卦</div><div id="meta" class="meta"></div><div class="tableWrap"><div class="thead"><div>爻位</div><div>爻象</div><div>阴阳</div><div>纳甲纳支</div><div>五行</div><div>六亲</div><div>六神</div><div>世应</div><div>动</div></div><div id="rows"></div></div><div class="hint">显示顺序：上爻→初爻；录入顺序：初爻→上爻。动爻用 ★ 标记。</div></section><section class="card"><h2>卦象说明</h2><div id="gua" class="detail" style="min-height:260px">请先起卦。</div><h2>逐爻解释</h2><div id="detail" class="detail">点击左侧任意一爻查看详细信息。</div></section></div>
+<section class="card"><h2>🕘 本机历史</h2><div id="history" class="hint">暂无保存记录。</div></section></div>
 <script>
-const names=["坤","复","临","泰","大壮","夬","需","大畜","泰?","大有","夬?","乾","姤","同人","履","小畜",
-"明夷","既济","解","屯","益","震","噬嗑","随","师","坎","蹇","蒙","损","节","中孚","归妹",
-"晋","未济","困","讼","萃","否","遯","讼?","大过","鼎","恒","巽","井","蛊","升","讼?"];
-// 标准64卦按上卦/下卦二进制（1阳0阴）生成名称
-const trigramNames={"111":"乾","110":"兑","101":"离","100":"震","011":"巽","010":"坎","001":"艮","000":"坤"};
-const trigramElem={"乾":"金","兑":"金","离":"火","震":"木","巽":"木","坎":"水","艮":"土","坤":"土"};
-const branch=["子","丑","寅","卯","辰","巳","午","未","申","酉","戌","亥"];
-const elem={子:"水",丑:"土",寅:"木",卯:"木",辰:"土",巳:"火",午:"火",未:"土",申:"金",酉:"金",戌:"土",亥:"水"};
-const relOrder=["兄弟","子孙","妻财","官鬼","父母"];
-const pos=["初爻","二爻","三爻","四爻","五爻","上爻"];
-let bits=[0,0,0,0,0,0], moving=[false,false,false,false,false,false], active=0;
-
-const guaData={
-"乾乾":["乾为天","元亨利贞。","乾为天，象征刚健、自强、进取。"],
-"坤坤":["坤为地","元亨，利牝马之贞。","坤为地，象征厚德载物、顺势承载。"],
-"坎坎":["坎为水","习坎，有孚，维心亨，行有尚。","坎象征险阻与反复，重在守信、谨慎渡险。"],
-"离离":["离为火","利贞，亨。畜牝牛，吉。","离象征光明、依附与文明。"],
-"震震":["震为雷","亨。震来虩虩，笑言哑哑。","震象征突发、行动与警醒。"],
-"艮艮":["艮为山","艮其背，不获其身；行其庭，不见其人，无咎。","艮象征止、界限与静守。"],
-"巽巽":["巽为风","小亨，利有攸往，利见大人。","巽象征顺入、渐进与柔顺。"],
-"兑兑":["兑为泽","亨，利贞。","兑象征喜悦、交流与和悦。"]
+const TRIG={111:'乾',110:'兑',101:'离',100:'震',011:'巽',010:'坎',001:'艮',000:'坤'}, E={乾:'金',兑:'金',离:'火',震:'木',巽:'木',坎:'水',艮:'土',坤:'土'}, BE={子:'水',丑:'土',寅:'木',卯:'木',辰:'土',巳:'火',午:'火',未:'土',申:'金',酉:'金',戌:'土',亥:'水'}, P=['初爻','二爻','三爻','四爻','五爻','上爻'];
+const stems='甲乙丙丁戊己庚辛壬癸'.split(''), branches='子丑寅卯辰巳午未申酉戌亥'.split('');
+const NJ={乾:{i:['子','寅','辰'],o:['午','申','戌'],si:'甲',so:'壬'},兑:{i:['巳','卯','丑'],o:['亥','酉','未'],si:'丁',so:'丁'},离:{i:['卯','丑','亥'],o:['酉','未','巳'],si:'己',so:'己'},震:{i:['子','寅','辰'],o:['午','申','戌'],si:'庚',so:'庚'},巽:{i:['丑','亥','酉'],o:['未','巳','卯'],si:'辛',so:'辛'},坎:{i:['寅','辰','午'],o:['申','戌','子'],si:'戊',so:'戊'},艮:{i:['辰','午','申'],o:['戌','子','寅'],si:'丙',so:'丙'},坤:{i:['未','巳','卯'],o:['丑','亥','酉'],si:'乙',so:'癸'}};
+const HEX={
+'乾乾':'乾为天','兑乾':'天泽履','离乾':'天火同人','震乾':'天雷无妄','巽乾':'天风姤','坎乾':'天水讼','艮乾':'天山遯','坤乾':'天地否',
+'乾兑':'泽天夬','兑兑':'兑为泽','离兑':'泽火革','震兑':'泽雷随','巽兑':'泽风大过','坎兑':'泽水困','艮兑':'泽山咸','坤兑':'泽地萃',
+'乾离':'火天大有','兑离':'火泽睽','离离':'离为火','震离':'火雷噬嗑','巽离':'火风鼎','坎离':'火水未济','艮离':'火山旅','坤离':'火地晋',
+'乾震':'雷天大壮','兑震':'雷泽归妹','离震':'雷火丰','震震':'震为雷','巽震':'雷风恒','坎震':'雷水解','艮震':'雷山小过','坤震':'雷地豫',
+'乾巽':'风天小畜','兑巽':'风泽中孚','离巽':'风火家人','震巽':'风雷益','巽巽':'巽为风','坎巽':'风水涣','艮巽':'风山渐','坤巽':'风地观',
+'乾坎':'水天需','兑坎':'水泽节','离坎':'水火既济','震坎':'水雷屯','巽坎':'水风井','坎坎':'坎为水','艮坎':'水山蹇','坤坎':'水地比',
+'乾艮':'山天大畜','兑艮':'山泽损','离艮':'山火贲','震艮':'山雷颐','巽艮':'山风蛊','坎艮':'山水蒙','艮艮':'艮为山','坤艮':'山地剥',
+'乾坤':'地天泰','兑坤':'地泽临','离坤':'地火明夷','震坤':'地雷复','巽坤':'地风升','坎坤':'地水师','艮坤':'地山谦','坤坤':'坤为地'};
+const ORDER=['乾为天','坤为地','水雷屯','山水蒙','水天需','天水讼','地水师','水地比','风天小畜','天泽履','地天泰','天地否','天火同人','火天大有','地山谦','雷地豫','泽雷随','山风蛊','地泽临','风地观','火雷噬嗑','山火贲','山地剥','地雷复','天雷无妄','山天大畜','山雷颐','泽风大过','坎为水','离为火','泽山咸','雷风恒','天山遯','雷天大壮','火地晋','地火明夷','风火家人','火泽睽','水山蹇','雷水解','山泽损','风雷益','泽天夬','天风姤','泽地萃','地风升','泽水困','水风井','泽火革','火风鼎','震为雷','艮为山','风山渐','雷泽归妹','雷火丰','火山旅','巽为风','兑为泽','风水涣','水泽节','风泽中孚','雷山小过','水火既济','火水未济'];
+const GUA_TEXT={
+'乾为天':{n:'乾',g:'元亨利贞。',l:['潜龙勿用。','见龙在田，利见大人。','君子终日乾乾，夕惕若，厉无咎。','或跃在渊，无咎。','飞龙在天，利见大人。','亢龙有悔。'],kw:'刚健、自强、进取；盛极需知进退。'},
+'坤为地':{n:'坤',g:'元亨，利牝马之贞。君子有攸往，先迷后得主，利西南得朋，东北丧朋。安贞吉。',l:['履霜，坚冰至。','直方大，不习无不利。','含章可贞。或从王事，无成有终。','括囊，无咎，无誉。','黄裳，元吉。','龙战于野，其血玄黄。'],kw:'柔顺、承载、厚德；重在守正与顺势。'},
+'水雷屯':{n:'屯',g:'元亨利贞。勿用，有攸往，利建侯。',l:['磐桓。利居贞，利建侯。','屯如邅如，乘马班如。匪寇婚媾，女子贞不字，十年乃字。','即鹿无虞，惟入于林中，君子几不如舍，往吝。','乘马班如，求婚媾，往吉，无不利。','屯其膏。小贞吉，大贞凶。','乘马班如，泣血涟如。'],kw:'草创、艰难、起步；宜稳住根基。'},
+'山水蒙':{n:'蒙',g:'亨。匪我求童蒙，童蒙求我。初筮告，再三渎，渎则不告。利贞。',l:['发蒙，利用刑人，用说桎梏，以往吝。','包蒙吉。纳妇吉。子克家。','勿用娶女，见金夫，不有躬，无攸利。','困蒙，吝。','童蒙，吉。','击蒙。不利为寇，利御寇。'],kw:'启蒙、学习、疑惑；贵在求教与守正。'},
 };
-function coin(){let s=[2,2,2].map(()=>Math.random()<.5?2:3).reduce((a,b)=>a+b,0);return s===6?[0,1]:s===7?[1,0]:s===8?[0,0]:[1,1]}
-function cast(){let a=Array.from({length:6},coin);bits=a.map(x=>x[0]);moving=a.map(x=>!!x[1]);render()}
-function coinCast(){cast()}
-function randomCast(){bits=Array.from({length:6},()=>Math.random()<.5?0:1);moving=Array.from({length:6},()=>Math.random()<.22);render()}
-function timeCast(){let d=new Date();let seed=d.getFullYear()+d.getMonth()+1+d.getDate()+d.getHours();let r=Math.sin(seed)*10000;bits=Array.from({length:6},(_,i)=>{r=Math.sin(r+i)*10000;return r-Math.floor(r)>.5?1:0});moving=Array.from({length:6},(_,i)=>{r=Math.sin(r+i+20)*10000;return r-Math.floor(r)<.22});render()}
-function clearCast(){bits=[0,0,0,0,0,0];moving=[false,false,false,false,false,false];document.getElementById("title").textContent="等待起卦";document.getElementById("lines").innerHTML="";document.getElementById("meta").innerHTML="";document.getElementById("gua").textContent="请先起卦。";document.getElementById("detail").textContent="点击左侧任意一爻查看信息。"}
-function namesFor(b){let low=b.slice(0,3).join(""),up=b.slice(3,6).join("");return [trigramNames[up],trigramNames[low]]}
-function relationFor(y){let e=elem[y];let base="土"; // 演示：以卦宫五行为“我”
-let palace=namesFor(bits)[0];let pe=trigramElem[palace];let order={木:["木","火","土","金","水"],火:["火","土","金","水","木"],土:["土","金","水","木","火"],金:["金","水","木","火","土"],水:["水","木","火","土","金"]}[pe];
-let idx=order.indexOf(e);return relOrder[idx<0?0:idx]}
-function render(){
-let [up,low]=namesFor(bits), changed=bits.map((b,i)=>moving[i]?1-b:b), [cup,clow]=namesFor(changed);
-let key=up+low, cd=cup+clow;
-let gd=guaData[key]||[up+low,"—",`${up}上${low}下。可结合六爻纳甲与动爻进一步分析。`];
-document.getElementById("title").textContent=gd[0]+"  →  "+(guaData[cd]?.[0]||cup+clow);
-let now=new Date();document.getElementById("meta").innerHTML=`<div>时间：${now.toLocaleString()}</div><div>上卦：${up}（${trigramElem[up]}）</div><div>下卦：${low}（${trigramElem[low]}）</div><div>动爻：${moving.map((x,i)=>x?pos[i]:"").filter(Boolean).join("、")||"无"}</div><div>本卦：${gd[0]}</div><div>变卦：${guaData[cd]?.[0]||cup+clow}</div>`;
-let html="";
-for(let i=5;i>=0;i--){let y=branch[i], rel=relationFor(y), se=i===2?"世":i===5?"应":"";html+=`<div class="line ${i===active?"active":""}" onclick="show(${i})"><div>${pos[i]}</div><div class="symbol">${bits[i]?"━━━":"━ ━"}</div><div>${bits[i]?"阳":"阴"}</div><div>${y}</div><div>${elem[y]}</div><div>${rel}</div><div>${se}</div><div class="move">${moving[i]?"★":""}</div></div>`}
-document.getElementById("lines").innerHTML=html;
-document.getElementById("gua").innerHTML=`<b>卦辞：</b>${gd[1]}<br><br><b>卦义：</b>${gd[2]}<br><br><b>上下卦：</b>${up}（${trigramElem[up]}）＋${low}（${trigramElem[low]}）`;
-show(active);
-}
-function show(i){active=i;let y=branch[i],rel=relationFor(y),e=elem[y],se=i===2?"世爻":i===5?"应爻":"普通爻";document.getElementById("detail").textContent=`【${pos[i]}${moving[i]?" · 动爻":""}】
-
-阴阳：${bits[i]?"阳爻":"阴爻"}
-纳支：${y}
-五行：${e}
-六亲：${rel}
-世应：${se}
-
-【传统爻位提示】
-初爻：事情初始、根基。
-二爻：内卦中位，常取中正之象。
-三爻：内外卦交界，常有进退之象。
-四爻：外卦初位，事情开始外显。
-五爻：外卦中位，常取尊位、中正之象。
-上爻：事情发展至终局。
-
-【五行】
-${e}与其他爻之间可按生、克、同、泄、耗关系分析；实际六爻判断还应结合月建、日辰、旬空、冲合、旺衰、动变等。
-
-【爻辞】
-本演示版已建立排盘结构；384条完整爻辞可继续加入本地数据库。`;
-document.querySelectorAll(".line").forEach((x,n)=>{if(n>0)x.classList.remove("active")});
-renderLineHighlight(i)}
-function renderLineHighlight(i){let rows=document.querySelectorAll("#lines .line");rows.forEach(r=>r.classList.remove("active"));let target=rows[5-i];if(target)target.classList.add("active")}
-
-// ===== 可搜索知识库 =====
-const knowledge = [
-["乾为天","卦象","乾：刚健、自强、进取。卦辞：元亨利贞。","乾","金","八卦"],
-["坤为地","卦象","坤：厚德载物、顺势承载。卦辞：元亨，利牝马之贞。","坤","土","八卦"],
-["坎为水","卦象","坎：险阻、反复、谨慎。卦辞：习坎，有孚，维心亨，行有尚。","坎","水","八卦"],
-["离为火","卦象","离：光明、依附、文明。卦辞：利贞，亨。畜牝牛，吉。","离","火","八卦"],
-["震为雷","卦象","震：行动、警醒、突发。卦辞：亨。震来虩虩，笑言哑哑。","震","木","八卦"],
-["艮为山","卦象","艮：止、界限、静守。卦辞：艮其背，不获其身。","艮","土","八卦"],
-["巽为风","卦象","巽：顺入、渐进、柔顺。卦辞：小亨，利有攸往，利见大人。","巽","木","八卦"],
-["兑为泽","卦象","兑：喜悦、交流、和悦。卦辞：亨，利贞。","兑","金","八卦"],
-["子","纳支","子水；十二地支之一。常见六爻纳支中用于表示水性地支。","子","水","地支"],
-["丑","纳支","丑土；十二地支之一。","丑","土","地支"],
-["寅","纳支","寅木；十二地支之一。","寅","木","地支"],
-["卯","纳支","卯木；十二地支之一。","卯","木","地支"],
-["辰","纳支","辰土；十二地支之一。","辰","土","地支"],
-["巳","纳支","巳火；十二地支之一。","巳","火","地支"],
-["午","纳支","午火；十二地支之一。","午","火","地支"],
-["未","纳支","未土；十二地支之一。","未","土","地支"],
-["申","纳支","申金；十二地支之一。","申","金","地支"],
-["酉","纳支","酉金；十二地支之一。","酉","金","地支"],
-["戌","纳支","戌土；十二地支之一。","戌","土","地支"],
-["亥","纳支","亥水；十二地支之一。","亥","水","地支"],
-["木","五行","木生火、木克土；同木为比和。","木","木","五行"],
-["火","五行","火生土、火克金；同火为比和。","火","火","五行"],
-["土","五行","土生金、土克水；同土为比和。","土","土","五行"],
-["金","五行","金生水、金克木；同金为比和。","金","金","五行"],
-["水","五行","水生木、水克火；同水为比和。","水","水","五行"],
-["父母","六亲","传统六爻六亲之一，常取父母、文书、证件、房屋、长辈等象。","","","六亲"],
-["兄弟","六亲","传统六爻六亲之一，常取同辈、朋友、竞争、分财等象。","","","六亲"],
-["子孙","六亲","传统六爻六亲之一，常取晚辈、福神、医药、娱乐等象。","","","六亲"],
-["妻财","六亲","传统六爻六亲之一，常取财物、收入、妻妾、饮食等象。","","","六亲"],
-["官鬼","六亲","传统六爻六亲之一，常取官职、压力、疾病、约束等象。","","","六亲"],
-["初爻","爻位","通常取事情起始、根基、基层之象。","","","爻位"],
-["二爻","爻位","内卦中位，传统象义重视中正、承接。","","","爻位"],
-["三爻","爻位","内外卦交界，常见进退、转折之象。","","","爻位"],
-["四爻","爻位","外卦初位，事情开始外显。","","","爻位"],
-["五爻","爻位","外卦中位，传统上常取尊位、中正之象。","","","爻位"],
-["上爻","爻位","事情发展到终局、极点或阶段性收束。","","","爻位"],
-["旬空","规则","六爻中常根据起卦日柱确定旬空，用于判断某些爻在当下呈现虚弱、未实或暂不显之象。","","","规则"],
-["月建","规则","以起卦月令为重要时间因素之一，用于判断爻的旺衰及与月令的生克关系。","","","规则"],
-["日辰","规则","起卦当日地支称日辰，传统六爻判断中常与爻发生生、克、冲、合等关系。","","","规则"],
-["动爻","规则","动爻是起卦过程中发生阴阳变化的爻，通常是判断本卦转变为变卦的重要依据。","","","规则"],
-["世爻","规则","世爻代表占问主体或事情本身，具体取法依卦宫定世应规则。","","","规则"],
-["应爻","规则","应爻常用于代表对方、所问对象或外部环境，与世爻相互参照。","","","规则"],
-["用神","规则","根据占问事项选取主要六亲作为用神，是传统六爻分析的重要步骤。","","","规则"],
-["原神","规则","传统六爻术语，通常指能够生助用神的六亲。","","","规则"],
-["忌神","规则","传统六爻术语，通常指克制用神的六亲。","","","规则"],
-["仇神","规则","传统六爻术语，通常指介于用神与忌神生克关系中的不利因素，具体取法随体系而定。","","","规则"],
-["伏神","规则","当所需六亲未直接出现在卦中时，传统排盘会按规则取伏神，并结合飞神分析。","","","规则"],
-["六合","规则","六爻关系之一，常用于表示相合、合作、牵绊、结合等象义；具体吉凶需结合用神与旺衰判断。","","","规则"],
-["六冲","规则","六爻关系之一，常用于表示冲动、分离、变化、对立等象义；具体吉凶需结合所占事项判断。","","","规则"],
-];
-
-function esc(s){
-  return String(s).replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]));
-}
-
-function searchKnowledge(){
-  const q=document.getElementById("searchBox").value.trim().toLowerCase();
-  const box=document.getElementById("searchResults");
-  if(!q){box.innerHTML='<span style="color:#756e63">输入关键词，例如：乾、坎、子、五行、妻财、初爻……</span>';return}
-  const rows=knowledge.filter(x=>x.join(" ").toLowerCase().includes(q));
-  if(!rows.length){box.innerHTML='<span style="color:#a33">没有找到相关内容。可以试试“乾”“五行”“纳支”“妻财”等关键词。</span>';return}
-  box.innerHTML=rows.map(x=>`
-    <div style="padding:11px 4px;border-top:1px solid #eee5d8">
-      <b>${esc(x[0])}</b>
-      <span style="margin-left:8px;font-size:12px;padding:3px 7px;border-radius:5px;background:#eee7d8">${esc(x[1])}</span>
-      ${x[3]?`<span style="margin-left:8px">${esc(x[3])} · ${esc(x[4])}</span>`:""}
-      <div style="margin-top:5px;line-height:1.65">${esc(x[2])}</div>
-      ${x[5]?`<div style="font-size:13px;color:#756e63">关键词：${esc(x[5])}</div>`:""}
-    </div>`).join("");
-}
-
-function clearSearch(){
-  document.getElementById("searchBox").value="";
-  document.getElementById("searchResults").innerHTML="";
-}
-
-
-let searchType="全部";
-let historyKey="liuyao_history_v3";
-
-function setSearchType(t,btn){
-  searchType=t;
-  document.querySelectorAll(".tabs button").forEach(x=>x.classList.remove("on"));
-  btn.classList.add("on");
-  searchKnowledge();
-}
-function searchKnowledge(){
-  const q=document.getElementById("searchBox").value.trim().toLowerCase();
-  const box=document.getElementById("searchResults");
-  let rows=knowledge.filter(x=>searchType==="全部"||x[1]===searchType);
-  if(q) rows=rows.filter(x=>x.join(" ").toLowerCase().includes(q));
-  if(!q && searchType==="全部"){box.innerHTML='<span class="muted">输入关键词即可搜索；也可以先选择分类。</span>';return}
-  if(!rows.length){box.innerHTML='<span style="color:#a33">没有找到相关内容。</span>';return}
-  box.innerHTML=rows.slice(0,50).map(x=>`
-    <div class="result">
-      <b>${esc(x[0])}</b><span class="pill">${esc(x[1])}</span>
-      <div style="margin-top:5px;line-height:1.65">${esc(x[2])}</div>
-      ${x[3]?`<div class="muted">${esc(x[3])} · ${esc(x[4])} · ${esc(x[5])}</div>`:""}
-    </div>`).join("");
-}
-function saveCurrent(){
-  const item={time:new Date().toLocaleString(),bits:[...bits],moving:[...moving]};
-  const arr=JSON.parse(localStorage.getItem(historyKey)||"[]");
-  arr.unshift(item); localStorage.setItem(historyKey,JSON.stringify(arr.slice(0,20)));
-  alert("排盘已保存到本机浏览器。");
-}
-function exportText(){
-  const up=namesFor(bits)[0],low=namesFor(bits)[1],ch=bits.map((b,i)=>moving[i]?1-b:b);
-  const [cup,clow]=namesFor(ch);
-  const lines=bits.map((b,i)=>`${pos[i]} ${b?"阳":"阴"} 纳支${branch[i]} ${elem[branch[i]]} ${relationFor(branch[i])} ${i===2?"世":i===5?"应":""} ${moving[i]?"动爻":""}`).join("\n");
-  const text=`六爻周易排盘\n时间：${new Date().toLocaleString()}\n本卦：${guaData[up+low]?.[0]||up+low}\n变卦：${guaData[cup+clow]?.[0]||cup+clow}\n\n${lines}`;
-  const blob=new Blob([text],{type:"text/plain;charset=utf-8"});
-  const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="六爻排盘.txt";a.click();URL.revokeObjectURL(a.href);
-}
-
-</script>
-</body>
-</html>
+// 其余58卦经文采用可核对的常用《周易》卦辞、爻辞版本
+const MORE={
+'水天需':['有孚，光亨，贞吉，利涉大川。',['需于郊，利用恒，无咎。','需于沙，小有言，终吉。','需于泥，致寇至。','需于血，出自穴。','需于酒食，贞吉。','入于穴，有不速之客三人来，敬之终吉。']],
+'天水讼':['有孚，窒惕，中吉，终凶。利见大人，不利涉大川。',['不永所事，小有言，终吉。','不克讼，归而逋，其邑人三百户，无眚。','食旧德，贞厉，终吉，或从王事，无成。','不克讼，复即命，渝，安贞吉。','讼元吉。','或锡之鞶带，终朝三褫之。']],
+'地水师':['贞，丈人吉，无咎。',['师出以律，否臧凶。','在师中，吉，无咎。王三锡命。','师或舆尸，凶。','师左次，无咎。','田有禽，利执言，无咎。长子帅师，弟子舆尸，贞凶。','大君有命，开国承家，小人勿用。']],
+'水地比':['吉。原筮，元永贞，无咎。不宁方来，后夫凶。',['有孚比之，无咎。有孚盈缶，终来有它吉。','比之自内，贞吉。','比之匪人。','外比之，贞吉。','显比，王用三驱，失前禽，邑人不诫，吉。','比之无首，凶。']],
+'风天小畜':['亨。密云不雨，自我西郊。',['复自道，何其咎？吉。','牵复，吉。','舆说辐，夫妻反目。','有孚。血去惕出，无咎。','有孚挛如，富以其邻。','既雨既处，尚德载。妇贞厉，月几望，君子征凶。']],
+'天泽履':['履虎尾，不咥人，亨。',['素履，往无咎。','履道坦坦，幽人贞吉。','眇能视，跛能履。履虎尾，咥人，凶。武人为于大君。','履虎尾，愬愬，终吉。','夬履，贞厉。','视履，考祥其旋，元吉。']],
+'地天泰':['小往大来，吉亨。',['拔茅茹以其汇，征吉。','包荒，用冯河，不遐遗，朋亡，得尚于中行。','无平不陂，无往不复，艰贞无咎。勿恤其孚，于食有福。','翩翩不富，以其邻，不戒以孚。','帝乙归妹，以祉元吉。','城复于隍，勿用师，自邑告命。贞吝。']],
+'天地否':['否之匪人，不利君子贞。大往小来。',['拔茅茹，以其汇。贞吉，亨。','包承。小人吉，大人否亨。','包羞。','有命无咎，畴离祉。','休否，大人吉。其亡其亡，系于苞桑。','倾否，先否后喜。']],
+'天火同人':['同人于野，亨。利涉大川，利君子贞。',['同人于门，无咎。','同人于宗，吝。','伏戎于莽，升其高陵，三岁不兴。','乘其墉，弗克攻，吉。','同人，先号咷而后笑，大师克相遇。','同人于郊，无悔。']],
+'火天大有':['元亨。',['无交害。匪咎，艰则无咎。','大车以载，有攸往，无咎。','公用亨于天子，小人弗克。','匪其彭，无咎。','厥孚交如，威如，吉。','自天佑之，吉无不利。']],
+'地山谦':['亨，君子有终。',['谦谦君子，用涉大川，吉。','鸣谦，贞吉。','劳谦，君子有终，吉。','无不利，撝谦。','不富以其邻，利用侵伐，无不利。','鸣谦，利用行师，征邑国。']],
+'雷地豫':['利建侯行师。',['鸣豫，凶。','介于石，不终日，贞吉。','盱豫，悔，迟有悔。','由豫，大有得。勿疑，朋盍簪。','贞疾，恒不死。','冥豫，成有渝，无咎。']],
+'泽雷随':['元亨利贞，无咎。',['官有渝，贞吉。出门交有功。','系小子，失丈夫。','系丈夫，失小子。随有求得，利居贞。','随有获，贞凶。有孚在道，以明，何咎？','孚于嘉，吉。','拘系之，乃从维之。王用亨于西山。']],
+'山风蛊':['元亨，利涉大川。先甲三日，后甲三日。',['干父之蛊，有子，考无咎，厉，终吉。','干母之蛊，不可贞。','干父之蛊，小有悔，无大咎。','裕父之蛊，往见吝。','干父之蛊，用誉。','不事王侯，高尚其事。']],
+'地泽临':['元亨利贞，至于八月有凶。',['咸临，贞吉。','咸临，吉，无不利。','甘临，无攸利。既忧之，无咎。','至临，无咎。','知临，大君之宜，吉。','敦临，吉，无咎。']],
+'风地观':['盥而不荐，有孚颙若。',['童观，小人无咎，君子吝。','窥观，利女贞。','观我生，进退。','观国之光，利用宾于王。','观我生，君子无咎。','观其生，君子无咎。']],
+'火雷噬嗑':['亨，利用狱。',['屦校灭趾，无咎。','噬肤灭鼻，无咎。','噬腊肉，遇毒，小吝，无咎。','噬干胏，得金矢，利艰贞，吉。','噬干肉，得黄金，贞厉，无咎。','何校灭耳，凶。']],
+'山火贲':['亨，小利有攸往。',['贲其趾，舍车而徒。','贲其须。','贲如濡如，永贞吉。','贲如皤如，白马翰如，匪寇婚媾。','贲于丘园，束帛戋戋，吝，终吉。','白贲，无咎。']],
+'山地剥':['不利有攸往。',['剥床以足，蔑贞，凶。','剥床以辨，蔑贞凶。','剥之，无咎。','剥床以肤，凶。','贯鱼，以宫人宠，无不利。','硕果不食，君子得舆，小人剥庐。']],
+'地雷复':['亨。出入无疾，朋来无咎。反复其道，七日来复。利有攸往。',['不远复，无祗悔，元吉。','休复，吉。','频复，厉，无咎。','中行独复。','敦复，无悔。','迷复，凶，有灾眚。用行师，终有大败，以其国君凶，至于十年不克征。']],
+'天雷无妄':['元亨利贞。其匪正有眚，不利有攸往。',['无妄，往吉。','不耕获，不菑畲，则利有攸往。','无妄之灾，或系之牛，行人之得，邑人之灾。','可贞，无咎。','无妄之疾，勿药有喜。','无妄，行有眚，无攸利。']],
+'山天大畜':['利贞。不家食，吉，利涉大川。',['有厉，利已。','舆说輹。','良马逐，利艰贞。曰闲舆卫，利有攸往。','童牛之牿，元吉。','豶豕之牙，吉。','何天之衢，亨。']],
+'山雷颐':['贞吉，观颐，自求口实。',['舍尔灵龟，观我朵颐，凶。','颠颐，拂经于丘颐，征凶。','拂颐，贞凶，十年勿用，无攸利。','颠颐，吉。虎视眈眈，其欲逐逐，无咎。','拂经，居贞吉，不可涉大川。','由颐，厉吉。利涉大川。']],
+'泽风大过':['栋桡。利有攸往，亨。',['藉用白茅，无咎。','枯杨生稊，老夫得其女妻，无不利。','栋桡，凶。','栋隆，吉。有它，吝。','枯杨生华，老妇得其士夫，无咎无誉。','过涉灭顶，凶，无咎。']],
+'坎为水':['有孚，维心亨，行有尚。',['习坎，入于坎窞，凶。','坎有险，求小得。','来之坎坎，险且枕，入于坎窞，勿用。','樽酒簋贰，用缶，纳约自牖，终无咎。','坎不盈，祗既平，无咎。','系用徽纆，寘于丛棘，三岁不得，凶。']],
+'离为火':['利贞，亨。畜牝牛，吉。',['履错然，敬之，无咎。','黄离，元吉。','日昃之离，不鼓缶而歌，则大耋之嗟，凶。','突如其来如，焚如，死如，弃如。','出涕沱若，戚嗟若，吉。','王用出征，有嘉折首，获匪其丑，无咎。']],
+'泽山咸':['亨，利贞。取女吉。',['咸其拇。','咸其腓，凶，居吉。','咸其股，执其随，往吝。','贞吉，悔亡。憧憧往来，朋从尔思。','咸其脢，无悔。','咸其辅颊舌。']],
+'雷风恒':['亨，无咎，利贞，利有攸往。',['浚恒，贞凶，无攸利。','悔亡。','不恒其德，或承之羞，贞吝。','田无禽。','恒其德，贞，妇人吉，夫子凶。','振恒，凶。']],
+'天山遯':['亨，小利贞。',['遯尾，厉。勿用有攸往。','执之用黄牛之革，莫之胜说。','系遯，有疾，厉。畜臣妾，吉。','好遯，君子吉，小人否。','嘉遯，贞吉。','肥遯，无不利。']],
+'雷天大壮':['利贞。',['壮于趾，征凶，有孚。','贞吉。','小人用壮，君子用罔，贞厉。羝羊触藩，羸其角。','贞吉，悔亡。藩决不羸，壮于大舆之輹。','丧羊于易，无悔。','羝羊触藩，不能退，不能遂，无攸利。艰则吉。']],
+'火地晋':['康侯用锡马蕃庶，昼日三接。',['晋如摧如，贞吉。罔孚，裕无咎。','晋如愁如，贞吉。受兹介福，于其王母。','众允，悔亡。','晋如鼫鼠，贞厉。','悔亡。失得勿恤，往吉，无不利。','晋其角，维用伐邑。厉，吉，无咎，贞吝。']],
+'地火明夷':['利艰贞。',['明夷于飞，垂其翼。君子于行，三日不食，有攸往，主人有言。','明夷于左股，用拯马壮，吉。','明夷于南狩，得其大首，不可疾贞。','入于左腹，获明夷之心，于出门庭。','箕子之明夷，利贞。','不明，晦。初登于天，后入于地。']],
+'风火家人':['利女贞。',['闲有家，悔亡。','无攸遂，在中馈，贞吉。','家人嗃嗃，悔，厉，吉。妇子嘻嘻，终吝。','富家，大吉。','王假有家，勿恤，吉。','有孚，威如，终吉。']],
+'火泽睽':['小事吉。',['悔亡。丧马，勿逐，自复。见恶人，无咎。','遇主于巷，无咎。','见舆曳，其牛掣，其人天且劓。无初有终。','睽孤，遇元夫，交孚，厉，无咎。','悔亡。厥宗噬肤，往，何咎？','睽孤。见豕负涂，载鬼一车，先张之弧，后说之弧，匪寇，婚媾，往，遇雨，则吉。']],
+'水山蹇':['利西南，不利东北。利见大人，贞吉。',['往蹇，来誉。','王臣蹇蹇，匪躬之故。','往蹇，来反。','往蹇，来连。','大蹇，朋来。','往蹇，来硕，吉，利见大人。']],
+'雷水解':['利西南，无所往，其来复，吉。有攸往，夙吉。',['无咎。','田获三狐，得黄矢，贞吉。','负且乘，致寇至，贞吝。','解而拇，朋至斯孚。','君子维有解，吉。有孚于小人。','公用射隼于高墉之上，获之，无不利。']],
+'山泽损':['有孚，元吉，无咎，可贞，利有攸往。曷之用二簋，可用享。',['已事遄往，无咎。酌损之。','利贞，征凶。弗损益之。','三人行，则损一人，一人行，则得其友。','损其疾，使遄有喜，无咎。','或益之十朋之龟，弗克违，元吉。','弗损益之，无咎，贞吉。利有攸往，得臣无家。']],
+'风雷益':['利有攸往，利涉大川。',['利用为大作，元吉，无咎。','或益之十朋之龟，弗克违，永贞吉。王用享于帝，吉。','益之用凶事，无咎。有孚中行，告公用圭。','中行，告公从，利用为依迁国。','有孚惠心，勿问元吉。有孚惠我德。','莫益之，或击之。立心勿恒，凶。']],
+'泽天夬':['扬于王庭，孚号，有厉，告自邑，不利即戎，利有攸往。',['壮于前趾，往不胜，为咎。','惕号，莫夜有戎，勿恤。','壮于頄，有凶。君子夬夬，独行遇雨，若濡，有愠，无咎。','臀无肤，其行次且。牵羊悔亡，闻言不信。','苋陆夬夬，中行无咎。','无号，终有凶。']],
+'天风姤':['女壮，勿用取女。',['系于金柅，贞吉。有攸往，见凶。羸豕孚蹢躅。','包有鱼，无咎。不利宾。','臀无肤，其行次且。厉，无大咎。','包无鱼，起凶。','以杞包瓜，含章，有陨自天。','姤其角，吝，无咎。']],
+'泽地萃':['亨。王假有庙，利见大人，亨，利贞。用大牲吉，利有攸往。',['有孚不终，乃乱乃萃，若号，一握为笑，勿恤，往无咎。','引吉，无咎。孚乃利用禴。','萃如嗟如，无攸利。往无咎，小吝。','大吉，无咎。','萃有位，无咎。匪孚，元永贞，悔亡。','赍咨涕洟，无咎。']],
+'地风升':['元亨。用见大人，勿恤。南征吉。',['允升，大吉。','孚乃利用禴，无咎。','升虚邑。','王用亨于岐山，吉，无咎。','贞吉，升阶。','冥升。利于不息之贞。']],
+'泽水困':['亨，贞。大人吉，无咎。有言不信。',['臀困于株木，入于幽谷，三岁不觌。','困于酒食。朱绂方来，利用亨祀。征凶，无咎。','困于石，据于蒺藜。入于其宫，不见其妻，凶。','来徐徐，困于金车，吝，有终。','劓刖。困于赤绂，乃徐有说。利用祭祀。','困于葛藟，于臲卼，曰动悔。有悔，征吉。']],
+'水风井':['改邑不改井，无丧无得，往来井井。汔至，亦未繘井，羸其瓶，凶。',['井泥不食，旧井无禽。','井谷射鲋，瓮敝漏。','井渫不食，为我心恻。可用汲，王明，并受其福。','井甃，无咎。','井冽，寒泉食。','井收勿幕，有孚元吉。']],
+'泽火革':['已日乃孚。元亨利贞，悔亡。',['巩用黄牛之革。','己日乃革之，征吉，无咎。','征凶，贞厉。革言三就，有孚。','悔亡，有孚，改命吉。','大人虎变，未占有孚。','君子豹变，小人革面。征凶，居贞吉。']],
+'火风鼎':['元吉，亨。',['鼎颠趾，利出否。得妾以其子，无咎。','鼎有实，我仇有疾，不我能即，吉。','鼎耳革，其行塞，雉膏不食。方雨亏悔，终吉。','鼎折足，覆公餗，其形渥，凶。','鼎黄耳，金铉，利贞。','鼎玉铉，大吉，无不利。']],
+'震为雷':['亨。震来虩虩，笑言哑哑，震惊百里，不丧匕鬯。',['震来虩虩，后笑言哑哑，吉。','震来厉，亿丧贝，跻于九陵。勿逐，七日得。','震苏苏，震行，无眚。','震遂泥。','震往来厉，亿无丧，有事。','震索索，视矍矍，征凶。震不于其躬，于其邻，无咎。婚媾有言。']],
+'艮为山':['艮其背，不获其身，行其庭，不见其人。无咎。',['艮其趾，无咎。利永贞。','艮其腓，不拯其随，其心不快。','艮其限，列其夤，厉，熏心。','艮其身，无咎。','艮其辅，言有序，悔亡。','敦艮，吉。']],
+'风山渐':['女归吉，利贞。',['鸿渐于干，小子厉，有言，无咎。','鸿渐于磐，饮食衎衎，吉。','鸿渐于陆。夫征不复，妇孕不育，凶。利御寇。','鸿渐于木，或得其桷，无咎。','鸿渐于陵。妇三岁不孕，终莫之胜，吉。','鸿渐于陆，其羽可用为仪，吉。']],
+'雷泽归妹':['征凶，无攸利。',['归妹以娣。跛能履，征吉。','眇能视，利幽人之贞。','归妹以须，反归以娣。','归妹愆期，迟归有时。','帝乙归妹，其君之袂，不如其娣之袂良。月几望，吉。','女承筐无实，士刲羊无血，无攸利。']],
+'雷火丰':['亨，王假之。勿忧，宜日中。',['遇其配主，虽旬无咎。往有尚。','丰其蔀，日中见斗。往得疑疾，有孚发若，吉。','丰其沛，日中见沫。折其右肱，无咎。','丰其蔀，日中见斗。遇其夷主，吉。','来章，有庆誉，吉。','丰其屋，蔀其家，窥其户，阒其无人，三岁不觌，凶。']],
+'火山旅':['小亨，旅贞吉。',['旅琐琐，斯其所取灾。','旅即次，怀其资，得童仆贞。','旅焚其次，丧其童仆，贞厉。','旅于处，得其资斧，我心不快。','射雉，一矢亡，终以誉命。','鸟焚其巢，旅人先笑后号啕。丧牛于易，凶。']],
+'巽为风':['小亨。利有攸往，利见大人。',['进退，利武人之贞。','巽在床下。用史巫纷若，吉，无咎。','频巽，吝。','悔亡，田获三品。','贞吉，悔亡，无不利，无初有终。先庚三日，后庚三日，吉。','巽在床下，丧其资斧，贞凶。']],
+'兑为泽':['亨，利贞。',['和兑，吉。','孚兑，吉，悔亡。','来兑，凶。','商兑，未宁，介疾有喜。','孚于剥，有厉。','引兑。']],
+'风水涣':['亨。王假有庙，利涉大川，利贞。',['用拯马壮，吉。','涣奔其机，悔亡。','涣其躬，无悔。','涣其群，元吉。涣有丘，匪夷所思。','涣汗其大号，涣王居，无咎。','涣其血，去逖出，无咎。']],
+'水泽节':['亨。苦节，不可贞。',['不出户庭，无咎。','不出门庭，凶。','不节若，则嗟若，无咎。','安节，亨。','甘节，吉，往有尚。','苦节，贞凶，悔亡。']],
+'风泽中孚':['豚鱼吉。利涉大川，利贞。',['虞吉，有它不燕。','鸣鹤在阴，其子和之，我有好爵，吾与尔靡之。','得敌，或鼓，或罢，或泣，或歌。','月几望，马匹亡，无咎。','有孚挛如，无咎。','翰音登于天，贞凶。']],
+'雷山小过':['亨，利贞。可小事，不可大事。飞鸟遗之音，不宜上，宜下，大吉。',['飞鸟以凶。','过其祖，遇其妣，不及其君，遇其臣，无咎。','弗过，防之，从或戕之，凶。','无咎，弗过，遇之。往厉，必戒。勿用，永贞。','密云不雨，自我西郊。公弋取彼在穴。','弗遇过之，飞鸟离之，凶，是谓灾眚。']],
+'水火既济':['亨，小利贞。初吉，终乱。',['曳其轮，濡其尾，无咎。','妇丧其茀，勿逐，七日得。','高宗伐鬼方，三年克之。小人勿用。','繻有衣袽，终日戒。','东邻杀牛，不如西邻之禴祭，实受其福。','濡其首，厉。']],
+'火水未济':['亨，小狐汔济，濡其尾，无攸利。',['濡其尾，吝。','曳其轮，贞吉。','未济，征凶。利涉大川。','贞吉，悔亡。震用伐鬼方，三年有赏于大国。','贞吉，无悔。君子之光。有孚，吉。','有孚，于饮酒，无咎。濡其首，有孚失是。']]
+};
+for(const k in MORE) GUA_TEXT[k]={n:k.replace(/.*(乾|坤|屯|蒙|需|讼|师|比|小畜|履|泰|否|同人|大有|谦|豫|随|蛊|临|观|噬嗑|贲|剥|复|无妄|大畜|颐|大过|坎|离|咸|恒|遯|大壮|晋|明夷|家人|睽|蹇|解|损|益|夬|姤|萃|升|困|井|革|鼎|震|艮|渐|归妹|丰|旅|巽|兑|涣|节|中孚|小过|既济|未济).*/,'$1'),g:k in MORE?MORE[k][0]:'',l:k in MORE?MORE[k][1]:[],kw:'《周易》卦辞与爻辞常用版本；具体断卦需结合六爻装卦体系。'};
+// 补齐64卦：若个别古文版本字形有差异，以搜索数据为学习参考
+const PAL={
+乾:['乾乾','巽乾','艮乾','坤乾','坤巽','坤艮','坤离','乾离'],
+兑:['兑兑','坎兑','坤兑','艮兑','艮坎','艮坤','艮震','兑震'],
+离:['离离','艮离','巽离','坎离','坎艮','坎巽','坎乾','离乾'],
+震:['震震','坤震','坎震','巽震','巽坤','巽坎','巽兑','震兑'],
+巽:['巽巽','乾巽','离巽','震巽','震乾','震离','震艮','巽艮'],
+坎:['坎坎','兑坎','震坎','离坎','离兑','离震','离巽','坎巽'],
+艮:['艮艮','离艮','乾艮','兑艮','兑离','兑乾','兑巽','艮巽'],
+坤:['坤坤','震坤','兑坤','乾坤','乾震','乾兑','乾坎','坤坎']};
+const SE=[5,0,1,2,3,4,3,2];
+function bitsKey(b){return b.slice(3,6).join('')+b.slice(0,3).join('')}function trigNames(b){return [TRIG[b.slice(3,6).join('')],TRIG[b.slice(0,3).join('')]]}function hname(b){let n=trigNames(b);return HEX[n[0]+n[1]]}function changed(){return bits.map((x,i)=>move[i]?1-x:x)}
+function najia(b){let n=trigNames(b),lo=NJ[n[1]],up=NJ[n[0]];return [lo.si+lo.i[0],lo.si+lo.i[1],lo.si+lo.i[2],up.so+up.o[0],up.so+up.o[1],up.so+up.o[2]]}
+function palace(b){let k=trigNames(b).join('');for(const p in PAL){let i=PAL[p].indexOf(k);if(i>=0)return {p,i,se:SE[i],ying:(SE[i]+3)%6}}return {p:trigNames(b)[1],i:0,se:5,ying:2}}
+const gen={木:'火',火:'土',土:'金',金:'水',水:'木'}, ctl={木:'土',土:'水',水:'火',火:'金',金:'木'};
+function relation(le,pe){if(le===pe)return'兄弟';if(gen[pe]===le)return'子孙';if(ctl[pe]===le)return'妻财';if(gen[le]===pe)return'父母';return'官鬼'}
+const SIX=['青龙','朱雀','勾陈','螣蛇','白虎','玄武'];const SIXICON=['🐉','🐦','🟫','🐍','🐅','🐢'];const sixStart={甲:0,乙:0,丙:1,丁:1,戊:2,己:3,庚:4,辛:4,壬:5,癸:5};
+function sixGods(stem){let s=sixStart[stem]??0;return Array.from({length:6},(_,i)=>SIX[(s+i)%6])}
+function coin(){let sum=[0,0,0].map(()=>Math.random()<.5?2:3).reduce((a,b)=>a+b,0);return sum===6?[0,1]:sum===7?[1,0]:sum===8?[0,0]:[1,1]}
+function coinCast(){let a=Array.from({length:6},coin);bits=a.map(x=>x[0]);move=a.map(x=>x[1]);ctime=new Date();ques='';render()}
+function randomCast(){bits=Array.from({length:6},()=>Math.random()<.5?0:1);move=Array.from({length:6},()=>Math.random()<.22?1:0);ctime=new Date();ques='';render()}
+function localNow(){let d=new Date();d.setMinutes(d.getMinutes()-d.getTimezoneOffset());return d.toISOString().slice(0,16)}
+function openManual(){document.getElementById('manual').style.display='block';document.getElementById('mt').value=localNow();document.getElementById('manual').scrollIntoView({behavior:'smooth'})}function closeManual(){document.getElementById('manual').style.display='none'}
+function buildManual(){document.getElementById('manualLines').innerHTML=P.map((x,i)=>`<div class="manualLine"><label>${x}</label><select id="m${i}"><option value="0">阴（静爻）</option><option value="1">阳（静爻）</option><option value="2">阴（动爻）</option><option value="3">阳（动爻）</option></select></div>`).join('')}
+function applyManual(){bits=[];move=[];for(let i=0;i<6;i++){let v=+document.getElementById('m'+i).value;bits.push(v===1||v===3?1:0);move.push(v===2||v===3?1:0)}let s=document.getElementById('mt').value;ctime=new Date(s||Date.now());ques=document.getElementById('mq').value.trim();render();closeManual()}
+function jdn(y,m,d){let a=Math.floor((14-m)/12),yy=y+4800-a,mm=m+12*a-3;return d+Math.floor((153*mm+2)/5)+365*yy+Math.floor(yy/4)-Math.floor(yy/100)+Math.floor(yy/400)-32045}
+function dayGanzhi(date){let boundary=+document.getElementById('dayBoundary').value;let d=new Date(date);if(boundary===23&&d.getHours()>=23)d.setDate(d.getDate()+1);let jd=jdn(d.getFullYear(),d.getMonth()+1,d.getDate());let idx=(jd+49)%60;return {stem:stems[idx%10],branch:branches[idx%12],idx}}
+function yearGanzhi(y){let idx=((y-4)%60+60)%60;return stems[idx%10]+branches[idx%12]}
+function monthBranchAuto(d){let m=d.getMonth()+1,day=d.getDate();let key=m*100+day;if(key>=204&&key<=305)return'寅';if(key>=306&&key<=404)return'卯';if(key>=405&&key<=505)return'辰';if(key>=506&&key<=605)return'巳';if(key>=606&&key<=706)return'午';if(key>=707&&key<=806)return'未';if(key>=807&&key<=907)return'申';if(key>=908&&key<=1007)return'酉';if(key>=1008&&key<=1106)return'戌';if(key>=1107&&key<=1206)return'亥';if(key>=1207||key<=105)return'子';return'丑'}
+function monthStem(yearStem,branch){let start={甲:2,己:2,乙:4,庚:4,丙:6,辛:6,丁:8,壬:8,戊:0,癸:0}[yearStem];let bi=branches.indexOf(branch),n=(bi-2+12)%12;return stems[(start+n)%10]}
+function calendar(){if(!ctime)return null;let db=dayGanzhi(ctime);if(document.getElementById('dayPillarMode').value==='manual'){let idx=+document.getElementById('dayPillar').value;db={stem:stems[idx%10],branch:branches[idx%12],idx}}let ystem=stems[((ctime.getFullYear()-4)%60+60)%60%10],mb=document.getElementById('monthBranch').value;let mbv=mb==='auto'?monthBranchAuto(ctime):mb;let ms=monthStem(ystem,mbv),ys=yearGanzhi(ctime.getFullYear());let xunStart=(branches.indexOf(db.branch)-stems.indexOf(db.stem)+12)%12;let empty=[branches[(xunStart+10)%12],branches[(xunStart+11)%12]];return {day:db.stem+db.branch,dayStem:db.stem,dayBranch:db.branch,month:ms+mbv,monthBranch:mbv,year:ys,empty}}
+function render(){if(!ctime)ctime=new Date();let cal=calendar(),n=trigNames(bits),ch=changed(),pi=palace(bits),na=najia(bits),sg=sixGods(cal.dayStem);document.getElementById('title').textContent=hname(bits)+(move.some(Boolean)?'  →  '+hname(ch):'');document.getElementById('meta').innerHTML=`<div>起卦时间：${ctime.toLocaleString()}</div><div>本卦：${hname(bits)}</div><div>变卦：${move.some(Boolean)?hname(ch):'无变卦'}</div><div>卦宫：${pi.p}宫 · ${pi.i===0?'本宫':pi.i===6?'游魂':pi.i===7?'归魂':pi.i+'世'}</div><div>年柱：${cal.year}</div><div>月建：${cal.month}（${cal.monthBranch}）</div><div>日辰：${cal.day}</div><div>旬空：${cal.empty.join('、')}</div><div>上卦：${n[0]}（${E[n[0]]}）</div><div>下卦：${n[1]}（${E[n[1]]}）</div><div>动爻：${move.map((x,i)=>x?P[i]:'').filter(Boolean).join('、')||'无'}</div>${ques?`<div>占问：${esc(ques)}</div>`:''}`;document.getElementById('calendarInfo').innerHTML=`年柱：<b>${cal.year}</b>　月柱：<b>${cal.month}</b>　日柱：<b>${cal.day}</b>　日辰：<b>${cal.dayBranch}</b>　旬空：<b>${cal.empty.join('、')}</b>　六神初爻：<b>${sg[0]}</b>。<br>月建按节气月的日期区间自动推算；临近节气交界时可手动指定月建。`;
+let rows='';for(let i=5;i>=0;i--){let br=na[i].slice(1),rel=relation(BE[br],E[pi.p]),se=i===pi.se?'世':i===pi.ying?'应':'',empty=cal.empty.includes(br)?'空':'',trans=move[i]?'动':'';rows+=`<div class="row ${i===active?'active':''}" onclick="show(${i})"><div>${P[i]}</div><div class="symbol">${bits[i]?'━━━':'━ ━'}</div><div>${bits[i]?'阳':'阴'}</div><div>${na[i]}${empty?` <span class="pill">旬空</span>`:''}</div><div>${BE[br]}</div><div>${rel}</div><div>${SIXICON[SIX.indexOf(sg[i])]} ${sg[i]}</div><div>${se}</div><div>${trans?'★':''}</div></div>`}document.getElementById('rows').innerHTML=rows;let gt=GUA_TEXT[hname(bits)]||{g:'暂无卦辞数据',l:[],kw:'可结合上下卦象义学习。'};let gch=GUA_TEXT[hname(ch)]||gt;document.getElementById('gua').innerHTML=`<div class="guaText"><b>${hname(bits)}</b><br><span class="mini">上卦 ${n[0]}（${E[n[0]]}） · 下卦 ${n[1]}（${E[n[1]]}） · ${pi.p}宫 · 世${P[pi.se]} · 应${P[pi.ying]}</span><br><br><b>卦辞：</b>${esc(gt.g)}<br><br><b>象义关键词：</b>${esc(gt.kw||'')}<br><br><b>变卦：</b>${move.some(Boolean)?hname(ch)+'：'+esc(gch.g):'无动爻'}<br><br><b>历法：</b>${cal.year}年 ${cal.month}月 ${cal.day}日；旬空 ${cal.empty.join('、')}。</div>`;show(active,false)}
+function show(i){active=i;if(!ctime)return;let cal=calendar(),na=najia(bits),br=na[i].slice(1),pi=palace(bits),sg=sixGods(cal.dayStem),gt=GUA_TEXT[hname(bits)]||{l:[]};let line=gt.l?.[i]||'暂无该爻原文';document.getElementById('detail').textContent=`【${P[i]}${move[i]?' · 动爻':''}】\n\n阴阳：${bits[i]?'阳爻':'阴爻'}\n纳甲纳支：${na[i]}\n五行：${BE[br]}\n六亲：${relation(BE[br],E[pi.p])}\n六神：${sg[i]}\n世应：${i===pi.se?'世爻':i===pi.ying?'应爻':'普通爻'}\n旬空：${cal.empty.includes(br)?'是':'否'}\n\n《周易》对应爻辞：${line}\n\n爻位提示：${['事情初始、根基。','内卦中位，承接、中正。','内外卦交界，进退转折。','外卦初位，事情外显。','外卦中位，尊位、中正。','发展至极点或阶段性收束。'][i]}\n\n${move[i]?'动爻：本爻阴阳变化，形成变卦对应爻。':'静爻：本爻不发生阴阳变化。'}\n\n传统六爻断卦还需综合月建、日辰、旬空、旺衰、冲合、用神、原神、忌神、伏神等，网站提供学习排盘，不代替专业判断。`;renderRowsActive()}
+function renderRowsActive(){document.querySelectorAll('#rows .row').forEach((e,j)=>{let i=5-j;e.classList.toggle('active',i===active)})}
+const K=[];function addK(title,type,text,extra=''){K.push({title,type,text,extra})}
+for(const name of ORDER){let gt=GUA_TEXT[name];let key=Object.keys(HEX).find(k=>HEX[k]===name);let ns=key?key[0]+'上、'+key[1]+'下':'';addK(name,'卦象',`${name}。${ns}。${gt?.kw||'可结合卦辞与爻辞学习。'}`,name)}
+for(const name of ORDER){let gt=GUA_TEXT[name];if(gt?.l)gt.l.forEach((line,i)=>addK(`${name} · ${P[i]}`,'爻辞',line,name))}
+for(const x of P)addK(x,'爻位',['事情初始、根基。','内卦中位，承接、中正。','内外卦交界，进退转折。','外卦初位，事情外显。','外卦中位，尊位、中正。','发展至极点或阶段性收束。'][P.indexOf(x)]);
+for(const x of Object.keys(BE))addK(`${x}（${BE[x]}）`,'纳支',`${x}五行属${BE[x]}。`);for(const x of Object.keys(E))addK(`${x}卦（${E[x]}）`,'五行',`${x}卦五行属${E[x]}。`);for(const x of ['父母','兄弟','子孙','妻财','官鬼'])addK(x,'六亲','六亲之一，需以卦宫五行为基准，按生克关系确定。');[['旬空','由日柱所属旬推算两个空亡地支。'],['月建','以起卦时节气月的地支为月建，常用于判断旺衰。'],['日辰','起卦日的地支，参与生克冲合。'],['动爻','阴阳发生变化的爻，变化后形成变卦。'],['世爻','八宫定世后代表占问主体的一爻。'],['应爻','与世爻相隔三位，常用于取对方或外部。'],['用神','按占问事项选取主要六亲。'],['原神','生用神之爻。'],['忌神','克用神之爻。'],['仇神','克原神或生忌神的一类辅助关系，流派定义略有差异。'],['伏神','用神不现时，可从本宫卦寻找伏神。'],['六合','地支六合或卦六合等不同层次的合象。'],['六冲','地支六冲或卦六冲等不同层次的冲象。']].forEach(x=>addK(x[0],'规则',x[1]));
+function setType(t,e){stype=t;document.querySelectorAll('#tabs button').forEach(x=>x.classList.remove('on'));e.classList.add('on');searchKnowledge()}function searchKnowledge(){let q=document.getElementById('q').value.trim().toLowerCase(),a=K.filter(x=>stype==='全部'||x.type===stype);if(q)a=a.filter(x=>(x.title+' '+x.text+' '+x.extra).toLowerCase().includes(q));let target=document.getElementById('results');if(!q&&stype==='全部'){target.innerHTML='<span class="muted">已收录64卦名称及可检索的爻辞数据。输入“困”“水雷屯”“初九”“妻财”“子”等开始搜索。</span>';return}target.innerHTML=a.length?a.slice(0,120).map((x,idx)=>`<div class="result"><b>${esc(x.title)}</b><span class="pill">${x.type}</span><div>${esc(x.text)}</div>${x.type==='卦象'?`<div class="searchResultActions"><button class="small alt" onclick="loadHex('${esc(x.extra)}')">查看卦</button></div>`:''}</div>`).join(''):'<span class="warn">没有找到相关内容。</span>'}
+function loadHex(name){let key=Object.keys(HEX).find(k=>HEX[k]===name);if(!key)return;let map=Object.fromEntries(Object.entries(TRIG).map(([b,n])=>[n,b]));let up=map[key[0]],lo=map[key[1]];bits=[...lo].map(Number).concat([...up].map(Number));move=[0,0,0,0,0,0];ctime=ctime||new Date();render();document.getElementById('title').scrollIntoView({behavior:'smooth'})}
+const HK='liuyao_v6_history';function saveCurrent(){if(!ctime){alert('请先起卦。');return}let a=JSON.parse(localStorage.getItem(HK)||'[]');a.unshift({t:ctime.toISOString(),b:[...bits],m:[...move],q:ques});localStorage.setItem(HK,JSON.stringify(a.slice(0,50)));historyList();alert('已保存到本机浏览器。')}function historyList(){let a=JSON.parse(localStorage.getItem(HK)||'[]'),d=document.getElementById('history');if(!a.length){d.innerHTML='<span class="muted">暂无保存记录。</span>';return}d.innerHTML=a.map((x,i)=>`<div class="history"><div><b>${hname(x.b)}</b>${x.m.some(Boolean)?' → '+hname(x.b.map((b,j)=>x.m[j]?1-b:b)):''}<div class="muted">${new Date(x.t).toLocaleString()}${x.q?' · '+esc(x.q):''}</div></div><button class="alt small" onclick="loadH(${i})">载入</button></div>`).join('')}function loadH(i){let a=JSON.parse(localStorage.getItem(HK)||'[]'),x=a[i];bits=x.b;move=x.m;ctime=new Date(x.t);ques=x.q||'';render();scrollTo(0,0)}
+function exportText(){if(!ctime){alert('请先起卦。');return}let cal=calendar(),pi=palace(bits),na=najia(bits),sg=sixGods(cal.dayStem),s=`六爻周易排盘 V6\n起卦时间：${ctime.toLocaleString()}\n占问：${ques||'未填写'}\n本卦：${hname(bits)}\n变卦：${move.some(Boolean)?hname(changed()):'无'}\n卦宫：${pi.p}宫\n年柱：${cal.year}\n月柱：${cal.month}\n日柱：${cal.day}\n旬空：${cal.empty.join('、')}\n\n`+bits.map((b,i)=>`${P[i]}：${b?'阳':'阴'} ${najia(bits)[i]} ${BE[najia(bits)[i].slice(1)]} ${relation(BE[najia(bits)[i].slice(1)],E[pi.p])} ${sg[i]} ${i===pi.se?'世':i===pi.ying?'应':''} ${move[i]?'动爻':''}`).join('\n');let a=document.createElement('a');a.href=URL.createObjectURL(new Blob([s],{type:'text/plain;charset=utf-8'}));a.download='六爻排盘.txt';a.click()}
+function clearCast(){bits=[0,0,0,0,0,0];move=[0,0,0,0,0,0];ctime=null;ques='';document.getElementById('title').textContent='等待起卦';document.getElementById('meta').innerHTML='';document.getElementById('rows').innerHTML='';document.getElementById('gua').textContent='请先起卦。';document.getElementById('detail').textContent='点击左侧任意一爻查看详细信息。';document.getElementById('calendarInfo').textContent='起卦后自动显示历法信息。'}
+let bits=[0,0,0,0,0,0],move=[0,0,0,0,0,0],ctime=null,ques='',active=0,stype='全部';
+document.getElementById('dayPillarMode').addEventListener('change',()=>{document.getElementById('dayManualWrap').style.display=document.getElementById('dayPillarMode').value==='manual'?'block':'none';});
+function esc(s){return String(s).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}
+buildManual();document.getElementById('mt').value=localNow();let opts='';for(let i=0;i<60;i++)opts+=`<option value="${i}">${stems[i%10]+branches[i%12]}</option>`;document.getElementById('dayPillar').innerHTML=opts;historyList();searchKnowledge();
+</script></body></html>
